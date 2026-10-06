@@ -31,14 +31,23 @@ export async function POST(req: Request) {
     }
 
     // Official free fast FLUX model via SDK
-    const responseBlob = await hf.textToImage({
+    const response = await hf.textToImage({
       model: "black-forest-labs/FLUX.1-schnell",
       inputs: enhancedPrompt,
     });
 
-    const arrayBuffer = await responseBlob.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString("base64");
-    const imageUrl = `data:image/jpeg;base64,${base64}`;
+    let imageUrl = "";
+
+    if (typeof response === "string") {
+      imageUrl = response.startsWith("data:")
+        ? response
+        : `data:image/jpeg;base64,${response}`;
+    } else {
+      const blob = response as Blob;
+      const arrayBuffer = await blob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      imageUrl = `data:image/jpeg;base64,${buffer.toString("base64")}`;
+    }
 
     return NextResponse.json({ imageUrl });
   } catch (error: any) {
