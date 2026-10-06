@@ -1,69 +1,142 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import AudioStudio from "./components/AudioStudio";
+import VideoStudio from "./components/VideoStudio";
+import { NavItemList } from "./api/dist/data";
+import HistoryTab from "./components/HistoryTab";
+import HeavyList from "./HeavyList";
+import ThemeToggle from "./components/ThemeToggle";
+
+export default function StudioApp() {
+  const [activeNav, setActiveNav] = useState<any>("audio");
+  const [navItems] = useState<any[]>(NavItemList)
+
+  const navMenuClass = (activeNav: string, type: string) => {
+    const selectedNav =
+      activeNav === type
+        ? "bg-cyan-50 text-cyan-700 font-semibold dark:bg-slate-800/60 dark:text-cyan-400"
+        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/30";
+    return `w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${selectedNav}`;
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 dark:bg-[#07090e] dark:text-[#f0f4fc] font-sans antialiased selection:bg-cyan-500 selection:text-black">
+      {/* 1. LEFT SIDEBAR */}
+      <aside className="w-64 border-r border-slate-200 dark:border-[#171d2b] bg-white dark:bg-[#0b0e17] flex flex-col justify-between shrink-0">
+        <div>
+          <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-[#171d2b] gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20">
+              ⚡
+            </div>
+            <div>
+              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white block">
+                NEXUS STUDIO
+              </span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-cyan-600 dark:text-cyan-400 block -mt-1">
+                Enterprise AI Suite
+              </span>
+            </div>
+          </div>
+
+          <nav className="p-3 space-y-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-2">
+              Workspaces
+            </div>
+
+            <div className="space-y-1">
+              {navItems.map((item, index) => {
+                // Agar separator hai to divider line render karein
+                if (item.type === "separator") {
+                  return (
+                    <div key={`sep-${index}`} className="my-2.5 px-3">
+                      {item.label ? (
+                        <p className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 tracking-wider">
+                          {item.label}
+                        </p>
+                      ) : (
+                        <div className="border-t border-slate-200 dark:border-slate-700/50" />
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveNav(item.id)}
+                    className={navMenuClass(activeNav, item.id)}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className={item.iconSize}>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+
+                    {item.badge && (
+                      <span
+                        className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${item.badge.className}`}
+                      >
+                        {item.badge.text}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="p-4 border-t border-slate-200 dark:border-[#171d2b] space-y-2">
+          <div className="flex items-center justify-between px-2 py-1">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Session Status</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+              Live Online
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <button className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#141a27] dark:hover:bg-[#1c2438] dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-[#232d43] transition">
+              Log In
+            </button>
+            <button className="w-full py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-lg shadow transition">
+              Register
+            </button>
+          </div>
         </div>
-      </main>
+      </aside>
+
+      {/* 2. MAIN WORKSPACE */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="h-16 border-b border-slate-200 dark:border-[#171d2b] bg-white dark:bg-[#0a0d15] flex items-center justify-between px-8 shrink-0">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              {activeNav === "audio" && "Voiceover Studio / Production Console"}
+              {activeNav === "video" && "AI Video Generation / Motion Deck"}
+              {activeNav === "history" && "Saved Audio & Video Artifacts"}
+              {activeNav === "large-data" && "Large Dataset Pipeline / Virtualized Stream"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <div className="text-xs font-bold text-slate-700 dark:text-slate-200">Production Node #1</div>
+              <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">100% Unlimited Quota</div>
+            </div>
+            <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-cyan-600 dark:text-cyan-400">
+              AI
+            </div>
+            <ThemeToggle />
+          </div>
+        </header>
+
+        {/* WORKSPACE VIEW ROUTER */}
+        <main className="flex-1 overflow-y-auto p-8 bg-slate-100/70 dark:bg-gradient-to-b dark:from-[#090c13] dark:to-[#07090e]">
+          {activeNav === "audio" && <AudioStudio />}
+          {activeNav === "video" && <VideoStudio />}
+          {activeNav === "history" && <HistoryTab />}
+          {activeNav === "large-data" && <HeavyList />}
+        </main>
+      </div>
     </div>
   );
 }
