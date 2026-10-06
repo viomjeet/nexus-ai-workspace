@@ -3,13 +3,13 @@
 import React, { useState } from "react";
 import AudioStudio from "./components/AudioStudio";
 import VideoStudio from "./components/VideoStudio";
-import { NavItemList } from "./api/dist/data";
-import HistoryTab from "./components/HistoryTab";
+import { NavItemList } from "./api/dist/static-api";
 import HeavyList from "./HeavyList";
 import ThemeToggle from "./components/ThemeToggle";
+import ImageGenerator from "./components/ImageGenerator";
 
 export default function StudioApp() {
-  const [activeNav, setActiveNav] = useState<any>("audio");
+  const [activeNav, setActiveNav] = useState<any>("large-data");
   const [navItems] = useState<any[]>(NavItemList)
 
   const navMenuClass = (activeNav: string, type: string) => {
@@ -112,7 +112,7 @@ export default function StudioApp() {
             <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
               {activeNav === "audio" && "Voiceover Studio / Production Console"}
               {activeNav === "video" && "AI Video Generation / Motion Deck"}
-              {activeNav === "history" && "Saved Audio & Video Artifacts"}
+              {activeNav === "image" && "Saved Audio & Video Artifacts"}
               {activeNav === "large-data" && "Large Dataset Pipeline / Virtualized Stream"}
             </span>
           </div>
@@ -133,7 +133,7 @@ export default function StudioApp() {
         <main className="flex-1 overflow-y-auto p-8 bg-slate-100/70 dark:bg-gradient-to-b dark:from-[#090c13] dark:to-[#07090e]">
           {activeNav === "audio" && <AudioStudio />}
           {activeNav === "video" && <VideoStudio />}
-          {activeNav === "history" && <HistoryTab />}
+          {activeNav === "image" && <ImageGenerator />}
           {activeNav === "large-data" && <HeavyList />}
         </main>
       </div>
