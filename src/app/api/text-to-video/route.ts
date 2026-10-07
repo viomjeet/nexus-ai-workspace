@@ -1,68 +1,66 @@
 import { NextResponse } from "next/server";
+import { HfInference } from "@huggingface/inference";
 
-export const maxDuration = 60;
-
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { prompt, ratio } = await request.json();
+    const { prompt, ratio } = await req.json();
 
-    if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
+    if (!prompt) {
+      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    }
+
+    const hfToken = process.env.HF_TOKEN?.trim();
+    if (!hfToken) {
       return NextResponse.json(
-        { error: "Prompt is required to synthesize video frames." },
-        { status: 400 }
+        { error: "HF_TOKEN missing in environment variables" },
+        { status: 500 }
       );
     }
 
-    let width = 1280;
-    let height = 720;
+    const hf = new HfInference(hfToken);
+
+    let width = 1024;
+    let height = 576; // 16:9 cinema default
+
     if (ratio === "9:16") {
-      width = 720;
-      height = 1280;
+      width = 576;
+      height = 1024;
     } else if (ratio === "1:1") {
       width = 1024;
       height = 1024;
     }
 
-    const cleanPrompt = encodeURIComponent(
-      `${prompt.trim()}, cinematic film still, detailed studio setting, 8k resolution, photorealistic`
-    );
-    const seed = Math.floor(Math.random() * 900000) + 100000;
-    const params = `width=${width}&height=${height}&seed=${seed}&nologo=true`;
+    const enhancedPrompt = `${prompt}, cinematic video keyframe, 8k resolution, photorealistic, sharp focus, filmic lighting`;
 
-    // Key hai to new unified API, warna legacy anonymous endpoint (throttled)
-    const apiKey = process.env.POLLINATIONS_API_KEY;
-    const targetUrl = apiKey
-      ? `https://gen.pollinations.ai/image/${cleanPrompt}?${params}&key=${apiKey}`
-      : `https://image.pollinations.ai/prompt/${cleanPrompt}?${params}`;
-
-    const imageRes = await fetch(targetUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-      signal: AbortSignal.timeout(55000),
+    const response = await hf.textToImage({
+      model: "black-forest-labs/FLUX.1-schnell",
+      inputs: enhancedPrompt,
+      parameters: { width, height },
     });
 
-    const contentType = imageRes.headers.get("content-type") || "";
+    let buffer: Buffer;
 
-    // Status OK ho ya na ho, image na aaye to asli error dikhao
-    if (!imageRes.ok || !contentType.startsWith("image/")) {
-      const detail = await imageRes.text().catch(() => "");
-      throw new Error(`Upstream ${imageRes.status}: ${detail.slice(0, 200)}`);
+    if (typeof response === "string") {
+      const base64Data = response.replace(/^data:image\/\w+;base64,/, "");
+      buffer = Buffer.from(base64Data, "base64");
+    } else {
+      const blob = response as Blob;
+      const arrayBuffer = await blob.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
     }
 
-    const buffer = Buffer.from(await imageRes.arrayBuffer());
-
-    return new Response(buffer, {
+    // Uint8Array satisfies Web API BodyInit
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
-        "Content-Type": contentType,
+        "Content-Type": "image/jpeg",
         "Cache-Control": "no-store",
       },
     });
   } catch (error: any) {
-    console.error("Video Server Proxy Error:", error);
+    console.error("Frame synthesis error:", error);
     return NextResponse.json(
-      { error: error?.message || "Failed to generate video sequence." },
+      { error: error?.message || "Failed to generate video frame" },
       { status: 500 }
     );
   }

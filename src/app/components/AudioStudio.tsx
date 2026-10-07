@@ -29,7 +29,6 @@ export default function AudioStudio() {
   const audioRef = useRef<any>(null);
   const bgmRef = useRef<any>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const playerSectionRef = useRef<HTMLDivElement | null>(null);
   const bgmInputRef = useRef<HTMLInputElement | null>(null);
 
   const isHindiScript = /[\u0900-\u097F]/.test(text);
@@ -102,40 +101,6 @@ export default function AudioStudio() {
     setCurrentTime(0);
   };
 
-  const toggleBgmSoloPlay = () => {
-    if (!bgmRef.current || !bgmUrl) return;
-
-    if (audioRef.current && isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-
-    if (isBgmSoloPlaying) {
-      bgmRef.current.pause();
-      setIsBgmSoloPlaying(false);
-    } else {
-      bgmRef.current.playbackRate = 1.0;
-      bgmRef.current.play();
-      setIsBgmSoloPlaying(true);
-    }
-  };
-
-  const stopBgmSolo = () => {
-    if (!bgmRef.current) return;
-    bgmRef.current.pause();
-    bgmRef.current.currentTime = 0;
-    setBgmCurrentTime(0);
-    setIsBgmSoloPlaying(false);
-  };
-
-  const handleBgmSeek = (e: any) => {
-    const time = parseFloat(e.target.value);
-    setBgmCurrentTime(time);
-    if (bgmRef.current) {
-      bgmRef.current.currentTime = time;
-    }
-  };
-
   const handleSpeedChange = (speed: number) => {
     setPlaybackSpeed(speed);
     if (audioRef.current) {
@@ -155,7 +120,6 @@ export default function AudioStudio() {
     if (!file.type.startsWith("audio/")) {
       return alert("Please upload a valid audio file (.mp3, .wav, etc.)");
     }
-    stopBgmSolo();
     setBgmBlob(file);
     const url = URL.createObjectURL(file);
     setBgmUrl(url);
@@ -172,12 +136,16 @@ export default function AudioStudio() {
   };
 
   const handleRemoveBgm = () => {
-    stopBgmSolo();
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+    }
     setBgmBlob(null);
     setBgmUrl(null);
     setBgmFileName(null);
     setBgmCurrentTime(0);
     setBgmDuration(0);
+    setIsBgmSoloPlaying(false);
     if (bgmInputRef.current) {
       bgmInputRef.current.value = "";
     }
@@ -205,10 +173,6 @@ export default function AudioStudio() {
       setAudioBlob(blob);
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
-
-      setTimeout(() => {
-        playerSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
     } catch (err: any) {
       if (err.name === "AbortError") {
         console.log("Audio synthesis canceled.");
@@ -218,13 +182,6 @@ export default function AudioStudio() {
     } finally {
       setIsAudioLoading(false);
       abortControllerRef.current = null;
-    }
-  };
-
-  const handleCancelGeneration = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsAudioLoading(false);
     }
   };
 
@@ -346,7 +303,7 @@ export default function AudioStudio() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-6">
       {audioUrl && (
         <audio
           ref={audioRef}
@@ -382,267 +339,128 @@ export default function AudioStudio() {
         />
       )}
 
-      {/* SCRIPT COMPOSER */}
       <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-xl p-4 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-5 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1a2233] pb-4">
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1d2537] pb-4 sm:pb-6">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-wide">
-              Speech Script Composer
-            </h2>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Compose, pace, and shape your voiceover sequence.
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Neural Audio & Voice Studio
+              </h2>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                VOICE ENGINE
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+              Synthesize studio-grade neural voiceovers with synchronized multi-track scoring.
             </p>
           </div>
-          <span className="self-start sm:self-auto text-xs font-mono text-cyan-700 bg-cyan-50 border border-cyan-200 dark:text-cyan-400 dark:bg-cyan-950/60 dark:border-cyan-800/40 px-3 py-1 rounded-full">
-            {text.length} characters
+
+          <span className="self-start sm:self-auto px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-50 dark:bg-[#0d2229] border border-cyan-200 dark:border-cyan-500/30 text-cyan-700 dark:text-cyan-400 shrink-0">
+            Neural-TTS v2
           </span>
         </div>
 
-        <textarea
-          rows={7}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Write or paste your script here..."
-          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 sm:p-5 text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 dark:bg-[#090c14] dark:border-[#1b2334] dark:text-slate-100 dark:placeholder-slate-600 transition leading-relaxed resize-none font-mono"
-        />
+        {/* Input & Output Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1">
-          <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-            <span>Output Format:</span>
-            <span className="font-mono text-slate-700 bg-slate-100 dark:bg-[#161d2d] dark:text-white px-2 py-0.5 rounded border border-slate-200 dark:border-[#232e47]">
-              MP3 24kHz @ 48kbps
-            </span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-auto">
-              <select
-                value={voice}
-                onChange={(e) => setVoice(e.target.value)}
-                className="w-full sm:w-auto bg-white border border-slate-200 hover:border-cyan-500/50 text-slate-800 text-xs font-semibold rounded-lg px-3.5 sm:px-4 py-2.5 sm:py-3 pr-8 focus:outline-none focus:border-cyan-400 dark:bg-[#141a27] dark:border-[#252f44] dark:text-slate-200 transition cursor-pointer appearance-none shadow-sm"
-              >
-                {voiceCatalog.map((v) => {
-                  const isOptionDisabled = isHindiScript && !v.id.startsWith("hi-IN");
-
-                  return (
-                    <option
-                      key={v.id}
-                      value={v.id}
-                      disabled={isOptionDisabled}
-                      className={`bg-white dark:bg-[#0f1420] py-1.5 ${
-                        isOptionDisabled ? "text-slate-400 dark:text-slate-600 bg-slate-100 dark:bg-[#0a0d14]" : "text-slate-800 dark:text-slate-200"
-                      }`}
-                    >
-                      {v.label} • {v.gender} {isOptionDisabled ? "(Hindi Not Supported)" : `(${v.badge})`}
-                    </option>
-                  );
-                })}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400 text-xs">
-                ▼
-              </div>
-            </div>
-
-            {!isAudioLoading ? (
-              <button
-                onClick={handleGenerateAudio}
-                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm rounded-lg shadow-lg shadow-cyan-500/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>⚡</span>
-                <span>Generate Voiceover</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleCancelGeneration}
-                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm rounded-lg shadow-lg shadow-rose-600/30 animate-pulse transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>✕</span>
-                <span>Abort Rendering</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* DUAL DECK: AUDIO MONITORING (70%) + BGM DECK (30%) */}
-      <div ref={playerSectionRef}>
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-          {/* AUDIO MONITORING DECK (70%) */}
-          <div
-            className={`lg:col-span-7 bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1f283c] rounded-xl p-4 sm:p-6 md:p-7 shadow-sm dark:shadow-2xl space-y-4 sm:space-y-5 transition-all duration-300 ${
-              audioUrl && !isAudioLoading
-                ? "opacity-100 ring-1 ring-cyan-500/30"
-                : "opacity-40 pointer-events-none"
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-[#1c2538] pb-3">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
-                  Master Synthesized Console
+          {/* Controls Column */}
+          <div className="lg:col-span-7 space-y-5">
+            {/* Prompt Box */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                <span>Text Prompt</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">
+                  {text.length > 0 ? `${text.length} Chars` : "Free Synthesis"}
                 </span>
-                <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
-                  Audio Monitoring & Mixer Deck
-                </h3>
-              </div>
-              <span className="self-start sm:self-auto text-xs font-mono text-slate-600 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-[#161d2d] px-3 py-1 rounded-full dark:border-[#232e47]">
-                {audioUrl ? "Render Complete" : "Standby"}
-              </span>
-            </div>
-
-            <div className="h-20 sm:h-24 bg-slate-50 border border-slate-200 dark:bg-[#080b12] dark:border-[#1b2335] rounded-xl flex flex-col items-center justify-center p-3 relative overflow-hidden">
-              <div className="flex items-end gap-1 sm:gap-1.5 h-12 sm:h-14 w-full justify-center">
-                {[30, 60, 25, 80, 90, 40, 65, 95, 55, 30, 70, 85, 45, 60, 75, 40, 85, 25].map(
-                  (h, idx) => (
-                    <div
-                      key={idx}
-                      style={{ height: isPlaying ? `${h}%` : "12%" }}
-                      className={`w-1.5 sm:w-2 rounded-full transition-all duration-150 ${
-                        isPlaying
-                          ? "bg-gradient-to-t from-cyan-500 to-indigo-500 shadow-md shadow-cyan-500/30"
-                          : "bg-slate-200 dark:bg-[#182030]"
-                      }`}
-                    />
-                  )
-                )}
-              </div>
-              <span className="text-[10px] font-mono text-slate-500 mt-1 truncate max-w-full px-2">
-                Stereo Output • {bgmFileName ? "Voice + BGM Synced" : "Voice Master"}
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
-                <span>Voice Progress</span>
-                <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max={duration || 0}
-                step="0.05"
-                value={currentTime}
-                onChange={handleMasterSeek}
-                className="w-full accent-cyan-500 dark:accent-cyan-400 cursor-pointer h-2 bg-slate-200 dark:bg-[#1a2336] rounded-sm appearance-none"
+              </label>
+              <textarea
+                rows={4}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Describe here..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 sm:p-5 text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 dark:bg-[#090c14] dark:border-[#1b2334] dark:text-slate-100 dark:placeholder-slate-600 transition leading-relaxed resize-none font-mono"
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] p-3 sm:p-3.5 rounded-xl">
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-slate-700 dark:text-slate-300">🎙 Voiceover Gain</span>
-                  <span className="font-mono text-cyan-600 dark:text-cyan-400">
-                    {Math.round(speechVolume * 100)}%
+            {/* Voice Actor Selection */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                <span>Voice Persona</span>
+                {isHindiScript && (
+                  <span className="text-[10px] text-amber-500 dark:text-amber-400 font-mono">
+                    Hindi Script Auto-locked
                   </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={speechVolume}
-                  onChange={(e) => setSpeechVolume(parseFloat(e.target.value))}
-                  className="w-full accent-cyan-500 dark:accent-cyan-400 cursor-pointer h-1.5 bg-slate-200 dark:bg-[#1e2638] rounded-sm appearance-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-slate-700 dark:text-slate-300">🎵 BGM Soundtrack Gain</span>
-                  <span className="font-mono text-indigo-600 dark:text-indigo-400">
-                    {bgmUrl ? `${Math.round(bgmVolume * 100)}%` : "Inactive"}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  disabled={!bgmUrl}
-                  value={bgmVolume}
-                  onChange={(e) => setBgmVolume(parseFloat(e.target.value))}
-                  className="w-full accent-indigo-500 dark:accent-indigo-400 cursor-pointer h-1.5 bg-slate-200 dark:bg-[#1e2638] rounded-sm appearance-none disabled:opacity-30"
-                />
+                )}
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {voiceCatalog.map((v) => {
+                  const isOptionDisabled = isHindiScript && !v.id.startsWith("hi-IN");
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      disabled={isOptionDisabled}
+                      onClick={() => setVoice(v.id)}
+                      className={`py-1.5 px-2 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${
+                        voice === v.id
+                          ? "bg-cyan-600 border-cyan-400 text-white"
+                          : isOptionDisabled
+                          ? "opacity-30 cursor-not-allowed bg-slate-100 dark:bg-[#0a0e18] border-slate-200 dark:border-[#161f30] text-slate-400"
+                          : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
+                      }`}
+                      title={`${v.label} (${v.gender})`}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-              <div className="flex items-center justify-between sm:justify-start gap-3">
-                <button
-                  onClick={toggleMasterPlay}
-                  className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-lg sm:text-xl flex items-center justify-center shadow-lg shadow-cyan-500/25 active:scale-95 transition cursor-pointer shrink-0"
-                >
-                  {isPlaying ? "❚❚" : "▶"}
-                </button>
-                <button
-                  onClick={stopMasterAudio}
-                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 flex items-center justify-center text-xs transition cursor-pointer shrink-0"
-                  title="Stop & Reset"
-                >
-                  ◼
-                </button>
-              </div>
-
-              <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 dark:bg-[#090c14] p-1 rounded-lg dark:border-[#1c2438] overflow-x-auto max-w-full">
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 px-2 uppercase shrink-0">
-                  Speed
-                </span>
-                {[0.75, 1, 1.25, 1.5, 2].map((speed) => (
+            {/* Playback Tempo */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                Playback Tempo
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { val: 0.75, label: "0.75x" },
+                  { val: 1.0, label: "1.0x" },
+                  { val: 1.25, label: "1.25x" },
+                  { val: 1.5, label: "1.5x" },
+                ].map((s) => (
                   <button
-                    key={speed}
-                    onClick={() => handleSpeedChange(speed)}
-                    className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md transition cursor-pointer shrink-0 ${
-                      playbackSpeed === speed
-                        ? "bg-cyan-500 text-black shadow"
-                        : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    key={s.val}
+                    type="button"
+                    onClick={() => handleSpeedChange(s.val)}
+                    className={`py-1.5 px-1 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${
+                      playbackSpeed === s.val
+                        ? "bg-cyan-600 border-cyan-400 text-white"
+                        : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
-                    {speed}x
+                    {s.label}
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={handleExportTrack}
-                disabled={isExporting}
-                className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-              >
-                <span>⬇</span>
-                <span>{isExporting ? "Mixing & Exporting..." : "Export Track"}</span>
-              </button>
             </div>
-          </div>
 
-          {/* BACKGROUND SOUNDTRACK DECK (30%) */}
-          <div className="lg:col-span-3 bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1f283c] rounded-xl p-4 sm:p-6 shadow-sm dark:shadow-2xl flex flex-col justify-between space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1c2538] pb-3">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-                    Layer 2 Audio
-                  </span>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Background Soundtrack Deck
-                  </h4>
-                </div>
+            {/* Background Soundtrack (Layer 2) */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                <span>Background Track (Layer 2)</span>
                 {bgmFileName && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => bgmInputRef.current?.click()}
-                      className="text-[10px] text-cyan-600 hover:text-cyan-500 dark:text-cyan-400 dark:hover:text-cyan-300 font-mono transition cursor-pointer"
-                    >
-                      Re-upload
-                    </button>
-                    <span className="text-slate-400 dark:text-slate-600">•</span>
-                    <button
-                      onClick={handleRemoveBgm}
-                      className="text-[10px] text-rose-500 hover:text-rose-400 dark:text-rose-400 dark:hover:text-rose-300 font-mono transition cursor-pointer"
-                    >
-                      Remove ✕
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveBgm}
+                    className="text-[10px] text-rose-500 hover:text-rose-400 font-mono cursor-pointer"
+                  >
+                    Remove ✕
+                  </button>
                 )}
-              </div>
-
+              </label>
               <input
                 ref={bgmInputRef}
                 type="file"
@@ -654,103 +472,189 @@ export default function AudioStudio() {
                   }
                 }}
               />
-
               <div
+                onClick={() => bgmInputRef.current?.click()}
                 onDragOver={(e) => {
                   e.preventDefault();
                   setIsDraggingBgm(true);
                 }}
                 onDragLeave={() => setIsDraggingBgm(false)}
                 onDrop={handleBgmDrop}
-                onClick={() => bgmInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
-                  isDraggingBgm
-                    ? "border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-950/20"
-                    : bgmFileName
-                    ? "border-emerald-500/40 bg-emerald-50/50 dark:bg-[#0a121c]"
-                    : "border-slate-300 bg-slate-50 hover:border-slate-400 dark:border-[#20293a] dark:bg-[#090c14] dark:hover:border-[#2f3d57]"
+                className={`p-2.5 rounded-lg border border-dashed cursor-pointer transition flex items-center justify-between gap-3 text-xs font-mono ${
+                  bgmFileName
+                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
-                {bgmFileName ? (
-                  <div className="space-y-1">
-                    <span className="text-emerald-500 dark:text-emerald-400 text-xl block">🎵</span>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white font-mono truncate px-1">
-                      {bgmFileName}
-                    </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                      Active track loaded • Click to replace
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-1 py-1">
-                    <span className="text-2xl block">📂</span>
-                    <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Drag & Drop audio or <span className="text-indigo-600 dark:text-indigo-400">Browse</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                      MP3, WAV, AAC files
-                    </div>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 truncate">
+                  <span>{bgmFileName ? "🎵" : "📂"}</span>
+                  <span className="truncate">
+                    {bgmFileName ? bgmFileName : "Add optional background music (.mp3, .wav)..."}
+                  </span>
+                </div>
+                <span className="text-[10px] text-cyan-600 dark:text-cyan-400 shrink-0 font-bold">
+                  {bgmFileName ? "Replace" : "Browse"}
+                </span>
               </div>
             </div>
 
-            {bgmUrl ? (
-              <div className="space-y-3 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] p-3.5 rounded-xl mt-auto">
-                <div className="flex justify-between items-center text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                  <span className="flex items-center gap-1.5">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        isBgmSoloPlaying ? "bg-indigo-500 dark:bg-indigo-400 animate-pulse" : "bg-slate-400 dark:bg-slate-500"
-                      }`}
-                    ></span>
-                    BGM Player
-                  </span>
-                  <span className="font-mono text-indigo-600 dark:text-indigo-400">
-                    {formatTime(bgmCurrentTime)} / {formatTime(bgmDuration)}
-                  </span>
+            {/* Generate Button */}
+            <button
+              type="button"
+              onClick={handleGenerateAudio}
+              disabled={isAudioLoading || !text.trim()}
+              className="w-full py-3 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 active:scale-98 text-white text-xs font-bold font-mono tracking-wider uppercase rounded-xl shadow-md shadow-cyan-900/20 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {isAudioLoading ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Synthesizing Voiceover...
+                </>
+              ) : (
+                <>
+                  <span>⚡</span> Generate Free Voiceover
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Right Column: Output / Audio Master Deck */}
+          <div className="lg:col-span-5 flex flex-col">
+            <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
+              Canvas Output
+            </label>
+            <div className="flex-1 min-h-[300px] sm:min-h-[340px] border border-slate-200 dark:border-[#1d2537] rounded-xl bg-slate-50/50 dark:bg-[#070a12]/50 flex flex-col items-center justify-center p-4 text-center overflow-hidden relative">
+              {isAudioLoading ? (
+                <div className="space-y-3">
+                  <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin mx-auto" />
+                  <p className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-semibold animate-pulse">
+                    Synthesizing neural speech...
+                  </p>
                 </div>
-
-                <input
-                  type="range"
-                  min="0"
-                  max={bgmDuration || 100}
-                  step="0.5"
-                  value={bgmCurrentTime}
-                  onChange={handleBgmSeek}
-                  className="w-full accent-indigo-500 dark:accent-indigo-400 cursor-pointer h-1.5 bg-slate-200 dark:bg-[#1e2638] rounded-sm appearance-none"
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={toggleBgmSoloPlay}
-                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow cursor-pointer"
-                    >
-                      <span>{isBgmSoloPlaying ? "❚❚" : "▶"}</span>
-                      <span>{isBgmSoloPlaying ? "Pause" : "Play"}</span>
-                    </button>
-
-                    <button
-                      onClick={stopBgmSolo}
-                      className="p-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 rounded-lg text-xs transition cursor-pointer"
-                      title="Stop & Reset Track"
-                    >
-                      ◼
-                    </button>
+              ) : audioUrl ? (
+                <div className="w-full flex flex-col items-center gap-3">
+                  {/* Visualizer Waveform */}
+                  <div className="w-full h-16 bg-slate-100 dark:bg-[#080b12] border border-slate-200 dark:border-[#1b2335] rounded-lg flex items-center justify-center p-2">
+                    <div className="flex items-end gap-1 h-10 w-full justify-center">
+                      {[30, 60, 25, 80, 90, 40, 65, 95, 55, 30, 70, 85, 45, 60, 75, 40, 85, 25].map(
+                        (h, idx) => (
+                          <div
+                            key={idx}
+                            style={{ height: isPlaying ? `${h}%` : "15%" }}
+                            className={`w-1.5 rounded-full transition-all duration-150 ${
+                              isPlaying
+                                ? "bg-gradient-to-t from-cyan-500 to-indigo-500 shadow-sm shadow-cyan-500/30"
+                                : "bg-slate-300 dark:bg-[#182030]"
+                            }`}
+                          />
+                        )
+                      )}
+                    </div>
                   </div>
 
-                  <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
-                    Cue Point
-                  </span>
+                  {/* Scrubber */}
+                  <div className="w-full space-y-1">
+                    <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                      <span>Voice Progress</span>
+                      <span>
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max={duration || 0}
+                      step="0.05"
+                      value={currentTime}
+                      onChange={handleMasterSeek}
+                      className="w-full accent-cyan-500 dark:accent-cyan-400 cursor-pointer h-1.5 bg-slate-200 dark:bg-[#1a2336] rounded-sm appearance-none"
+                    />
+                  </div>
+
+                  {/* Volume Mixers */}
+                  <div className="w-full grid grid-cols-2 gap-2 bg-slate-100/70 dark:bg-[#090c14] border border-slate-200 dark:border-[#1a2233] p-2.5 rounded-lg text-left">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-slate-600 dark:text-slate-400">🎙 Voice</span>
+                        <span className="text-cyan-600 dark:text-cyan-400 font-bold">
+                          {Math.round(speechVolume * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={speechVolume}
+                        onChange={(e) => setSpeechVolume(parseFloat(e.target.value))}
+                        className="w-full accent-cyan-500 dark:accent-cyan-400 cursor-pointer h-1 bg-slate-200 dark:bg-[#1e2638] rounded-sm appearance-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-slate-600 dark:text-slate-400">🎵 BGM</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                          {bgmUrl ? `${Math.round(bgmVolume * 100)}%` : "Off"}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        disabled={!bgmUrl}
+                        value={bgmVolume}
+                        onChange={(e) => setBgmVolume(parseFloat(e.target.value))}
+                        className="w-full accent-indigo-500 dark:accent-indigo-400 cursor-pointer h-1 bg-slate-200 dark:bg-[#1e2638] rounded-sm appearance-none disabled:opacity-30"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Play Controls & Download */}
+                  <div className="w-full flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={toggleMasterPlay}
+                        className="h-9 w-9 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm flex items-center justify-center shadow-md active:scale-95 transition cursor-pointer shrink-0"
+                      >
+                        {isPlaying ? "❚❚" : "▶"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopMasterAudio}
+                        className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 flex items-center justify-center text-xs transition cursor-pointer shrink-0"
+                        title="Stop"
+                      >
+                        ◼
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleExportTrack}
+                      disabled={isExporting}
+                      className="flex-1 py-2 px-3 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-mono font-bold rounded-lg shadow-md transition cursor-pointer text-center truncate"
+                    >
+                      {isExporting ? "Mixing..." : "Download Audio ⤓"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="p-3 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] rounded-xl text-center text-[11px] text-slate-400 dark:text-slate-500">
-                Upload a soundtrack to unlock independent audition & cue scrubbing.
-              </div>
-            )}
+              ) : (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-[#121927] border border-slate-200 dark:border-[#232e47] text-cyan-600 dark:text-cyan-400 text-2xl flex items-center justify-center mb-3 shadow-inner">
+                    🎙️
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono">
+                    No Audio Rendered Yet
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-1 max-w-xs">
+                    Enter your prompt and trigger the voiceover synthesis engine.
+                  </p>
+                </>
+              )}
+            </div>
           </div>
+
         </div>
       </div>
     </div>

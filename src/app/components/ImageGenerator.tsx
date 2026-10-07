@@ -90,8 +90,8 @@ export default function ImageGenerator() {
                                 rows={4}
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
-                                placeholder="A futuristic cybernetic tiger with glowing neon stripes prowling in rainy Tokyo streets, cinematic lighting, 8k..."
-                                className="w-full bg-slate-50 dark:bg-[#070a12] border border-slate-200 dark:border-[#1d2537] focus:border-cyan-500/80 rounded-xl p-3 sm:p-3.5 text-xs text-slate-800 dark:text-slate-200 font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition resize-none"
+                                placeholder="Describe here..."
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 sm:p-5 text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 dark:bg-[#090c14] dark:border-[#1b2334] dark:text-slate-100 dark:placeholder-slate-600 transition leading-relaxed resize-none font-mono"
                             />
                         </div>
 
@@ -106,9 +106,9 @@ export default function ImageGenerator() {
                                         key={ratio.id}
                                         type="button"
                                         onClick={() => setAspectRatio(ratio.id)}
-                                        className={`py-2 px-2.5 rounded-lg text-[11px] sm:text-xs font-mono font-medium transition cursor-pointer border text-center truncate ${aspectRatio === ratio.id
-                                                ? "bg-slate-900 dark:bg-cyan-950/70 border-slate-900 dark:border-cyan-500/60 text-white dark:text-cyan-300 shadow-sm"
-                                                : "bg-slate-50 dark:bg-[#070a12] border-slate-200 dark:border-[#1d2537] text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700"
+                                        className={`py-1.5 px-1 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${aspectRatio === ratio.id
+                                            ? "bg-cyan-600 border-cyan-400 text-white"
+                                            : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
                                             }`}
                                         title={ratio.label}
                                     >
@@ -129,9 +129,10 @@ export default function ImageGenerator() {
                                         key={style.id}
                                         type="button"
                                         onClick={() => setStylePreset(style.id)}
-                                        className={`py-2 px-2.5 rounded-lg text-[11px] sm:text-xs font-mono font-medium transition cursor-pointer border text-center truncate ${stylePreset === style.id
-                                                ? "bg-slate-900 dark:bg-indigo-950/70 border-slate-900 dark:border-indigo-500/60 text-white dark:text-indigo-300 shadow-sm"
-                                                : "bg-slate-50 dark:bg-[#070a12] border-slate-200 dark:border-[#1d2537] text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700"
+
+                                        className={`py-1.5 px-1 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${stylePreset === style.id
+                                            ? "bg-cyan-600 border-cyan-400 text-white"
+                                            : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
                                             }`}
                                         title={style.label}
                                     >
