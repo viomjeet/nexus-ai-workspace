@@ -135,7 +135,7 @@ export default function StudioApp() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="hidden grid grid-cols-2 gap-2 pt-1">
               <button className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#141a27] dark:hover:bg-[#1c2438] dark:text-slate-300 text-xs font-semibold rounded-lg border border-slate-200 dark:border-[#232d43] transition cursor-pointer">
                 Log In
               </button>
