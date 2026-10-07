@@ -3,7 +3,7 @@ import { HfInference } from "@huggingface/inference";
 
 export async function POST(req: Request) {
   try {
-    const { prompt, stylePreset } = await req.json();
+    const { prompt, stylePreset, aspectRatio } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const hfToken = process.env.HF_TOKEN?.trim();
     if (!hfToken) {
       return NextResponse.json(
-        { error: "HF_TOKEN missing in .env.local" },
+        { error: "HF_TOKEN missing in environment variables" },
         { status: 500 }
       );
     }
@@ -30,10 +30,29 @@ export async function POST(req: Request) {
       enhancedPrompt += ", digital artwork, 3d render, trending on artstation";
     }
 
-    // Official free fast FLUX model via SDK
+    // Dynamic resolution based on aspectRatio
+    let width = 1024;
+    let height = 1024;
+
+    if (aspectRatio === "16:9") {
+      width = 1024;
+      height = 576;
+    } else if (aspectRatio === "9:16") {
+      width = 576;
+      height = 1024;
+    } else if (aspectRatio === "4:3") {
+      width = 1024;
+      height = 768;
+    }
+
+    // Pass parameters explicitly to FLUX
     const response = await hf.textToImage({
       model: "black-forest-labs/FLUX.1-schnell",
       inputs: enhancedPrompt,
+      parameters: {
+        width,
+        height,
+      },
     });
 
     let imageUrl = "";
