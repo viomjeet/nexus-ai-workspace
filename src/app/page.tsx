@@ -179,7 +179,7 @@ export default function StudioApp() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="text-right hidden sm:block">
               <div className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">Production Node #1</div>
-              <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">100% Unlimited Quota</div>
+              <div className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">Free Demo Access</div>
             </div>
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-[11px] sm:text-xs font-bold text-cyan-600 dark:text-cyan-400 shrink-0">
               AI
