@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useToast } from "./Toast";
 
 export default function AudioStudio() {
+  const { showToast } = useToast();
   const [text, setText] = useState("");
   const [voice, setVoice] = useState("hi-IN-MadhurNeural");
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
@@ -30,6 +32,7 @@ export default function AudioStudio() {
   const bgmRef = useRef<any>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const bgmInputRef = useRef<HTMLInputElement | null>(null);
+  const outputSectionRef = useRef<HTMLDivElement | null>(null);
 
   const isHindiScript = /[\u0900-\u097F]/.test(text);
 
@@ -52,12 +55,12 @@ export default function AudioStudio() {
   }, [bgmVolume]);
 
   const voiceCatalog = [
-    { id: "hi-IN-MadhurNeural", label: "Madhur (Hindi)", gender: "Male", badge: "Flagship" },
-    { id: "hi-IN-SwaraNeural", label: "Swara (Hindi)", gender: "Female", badge: "Popular" },
-    { id: "en-IN-PrabhatNeural", label: "Prabhat (Indian English)", gender: "Male", badge: "EN-IN" },
-    { id: "en-IN-NeerjaNeural", label: "Neerja (Indian English)", gender: "Female", badge: "EN-IN" },
-    { id: "en-US-GuyNeural", label: "Guy (US Global)", gender: "Male", badge: "Global" },
-    { id: "en-US-JennyNeural", label: "Jenny (US Global)", gender: "Female", badge: "Global" },
+    { id: "hi-IN-MadhurNeural", name: "Madhur", lang: "Hindi", gender: "Male", badge: "Flagship" },
+    { id: "hi-IN-SwaraNeural", name: "Swara", lang: "Hindi", gender: "Female", badge: "Popular" },
+    { id: "en-IN-PrabhatNeural", name: "Prabhat", lang: "IN-English", gender: "Male", badge: "EN-IN" },
+    { id: "en-IN-NeerjaNeural", name: "Neerja", lang: "IN-English", gender: "Female", badge: "EN-IN" },
+    { id: "en-US-GuyNeural", name: "Guy", lang: "US-English", gender: "Male", badge: "Global" },
+    { id: "en-US-JennyNeural", name: "Jenny", lang: "US-English", gender: "Female", badge: "Global" },
   ];
 
   const handleTimeUpdate = () => {
@@ -118,13 +121,15 @@ export default function AudioStudio() {
 
   const handleBgmFile = (file: File) => {
     if (!file.type.startsWith("audio/")) {
-      return alert("Please upload a valid audio file (.mp3, .wav, etc.)");
+      showToast("Please upload a valid audio file (.mp3, .wav, etc.)", "warning");
+      return;
     }
     setBgmBlob(file);
     const url = URL.createObjectURL(file);
     setBgmUrl(url);
     setBgmFileName(file.name);
     setBgmCurrentTime(0);
+    showToast(`Background track loaded: ${file.name}`, "info");
   };
 
   const handleBgmDrop = (e: React.DragEvent) => {
@@ -149,13 +154,22 @@ export default function AudioStudio() {
     if (bgmInputRef.current) {
       bgmInputRef.current.value = "";
     }
+    showToast("Background audio track removed.", "info");
   };
 
   const handleGenerateAudio = async () => {
-    if (!text.trim()) return alert("Please enter your script before rendering.");
+    if (!text.trim()) {
+      showToast("Please enter your script before rendering.", "warning");
+      return;
+    }
 
     stopMasterAudio();
     setIsAudioLoading(true);
+
+    // Smooth scroll to output deck on mobile
+    if (window.innerWidth < 1024 && outputSectionRef.current) {
+      outputSectionRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
 
     abortControllerRef.current = new AbortController();
 
@@ -173,11 +187,17 @@ export default function AudioStudio() {
       setAudioBlob(blob);
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
+      showToast("Neural voiceover synthesized successfully!", "success");
+
+      // Auto scroll to audio master deck
+      if (window.innerWidth < 1024 && outputSectionRef.current) {
+        outputSectionRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
     } catch (err: any) {
       if (err.name === "AbortError") {
         console.log("Audio synthesis canceled.");
       } else {
-        alert("Synthesis failed: " + err.message);
+        showToast("Audio synthesis failed: " + err.message, "error");
       }
     } finally {
       setIsAudioLoading(false);
@@ -235,13 +255,17 @@ export default function AudioStudio() {
   };
 
   const handleExportTrack = async () => {
-    if (!audioBlob) return alert("Please generate audio first.");
+    if (!audioBlob) {
+      showToast("Please generate audio first before exporting.", "warning");
+      return;
+    }
 
     if (!bgmBlob) {
       const anchor = document.createElement("a");
       anchor.href = audioUrl!;
       anchor.download = "master-speech-track.mp3";
       anchor.click();
+      showToast("Voice track download initiated!", "info");
       return;
     }
 
@@ -287,9 +311,10 @@ export default function AudioStudio() {
       anchor.download = "master-mixed-track.wav";
       anchor.click();
       URL.revokeObjectURL(downloadUrl);
+      showToast("Master multi-track mix exported successfully!", "success");
     } catch (err: any) {
       console.error("Audio mixing error:", err);
-      alert("Failed to mix tracks: " + err.message);
+      showToast("Failed to mix tracks: " + err.message, "error");
     } finally {
       setIsExporting(false);
     }
@@ -339,7 +364,7 @@ export default function AudioStudio() {
         />
       )}
 
-      <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-xl p-4 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-5 sm:space-y-6">
+      <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-xl p-3.5 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-5 sm:space-y-6">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1d2537] pb-4 sm:pb-6">
           <div>
@@ -403,16 +428,23 @@ export default function AudioStudio() {
                       type="button"
                       disabled={isOptionDisabled}
                       onClick={() => setVoice(v.id)}
-                      className={`py-1.5 px-2 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${
+                      className={`py-1.5 px-2 text-[11px] sm:text-xs rounded-md border transition text-center cursor-pointer min-w-0 ${
                         voice === v.id
-                          ? "bg-cyan-600 border-cyan-400 text-white"
+                          ? "bg-cyan-600 border-cyan-400 text-white shadow-sm"
                           : isOptionDisabled
                           ? "opacity-30 cursor-not-allowed bg-slate-100 dark:bg-[#0a0e18] border-slate-200 dark:border-[#161f30] text-slate-400"
                           : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
                       }`}
-                      title={`${v.label} (${v.gender})`}
+                      title={`${v.name} (${v.lang}) - ${v.gender}`}
                     >
-                      {v.label}
+                      <div className="flex flex-col items-center justify-center leading-tight">
+                        <span className="font-bold text-[11px] sm:text-xs truncate max-w-full">
+                          {v.name}
+                        </span>
+                        <span className="text-[9px] sm:text-[10px] opacity-75 font-mono truncate max-w-full">
+                          {v.lang} ({v.gender === "Male" ? "M" : "F"})
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
@@ -480,14 +512,14 @@ export default function AudioStudio() {
                 }}
                 onDragLeave={() => setIsDraggingBgm(false)}
                 onDrop={handleBgmDrop}
-                className={`p-2.5 rounded-lg border border-dashed cursor-pointer transition flex items-center justify-between gap-3 text-xs font-mono ${
+                className={`p-2.5 rounded-lg border border-dashed cursor-pointer transition flex items-center justify-between gap-2 text-xs font-mono min-w-0 ${
                   bgmFileName
                     ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
                     : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
-                <div className="flex items-center gap-2 truncate">
-                  <span>{bgmFileName ? "🎵" : "📂"}</span>
+                <div className="flex items-center gap-2 truncate min-w-0">
+                  <span className="shrink-0">{bgmFileName ? "🎵" : "📂"}</span>
                   <span className="truncate">
                     {bgmFileName ? bgmFileName : "Add optional background music (.mp3, .wav)..."}
                   </span>
@@ -519,7 +551,7 @@ export default function AudioStudio() {
           </div>
 
           {/* Right Column: Output / Audio Master Deck */}
-          <div className="lg:col-span-5 flex flex-col">
+          <div ref={outputSectionRef} className="lg:col-span-5 flex flex-col">
             <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
               Canvas Output
             </label>

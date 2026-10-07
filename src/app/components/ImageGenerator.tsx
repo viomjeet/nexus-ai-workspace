@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useToast } from "./Toast";
 
 export default function ImageGenerator() {
+    const { showToast } = useToast();
+    const outputSectionRef = useRef<HTMLDivElement | null>(null);
+
     const [prompt, setPrompt] = useState("");
     const [aspectRatio, setAspectRatio] = useState("1:1");
     const [stylePreset, setStylePreset] = useState("photorealistic");
@@ -27,7 +31,10 @@ export default function ImageGenerator() {
     ];
 
     const handleGenerate = async () => {
-        if (!prompt.trim()) return;
+        if (!prompt.trim()) {
+            showToast("Please enter a text prompt first.", "warning");
+            return;
+        }
         setLoading(true);
         setError(null);
 
@@ -42,8 +49,15 @@ export default function ImageGenerator() {
             if (!res.ok) throw new Error(data.error || "Generation error");
 
             setImageUrl(data.imageUrl);
+            showToast("Neural visual synthesized successfully!", "success");
+
+            // Auto-scroll to output on mobile
+            setTimeout(() => {
+                outputSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
         } catch (err: any) {
             setError(err.message || "Something went wrong");
+            showToast(err.message || "Failed to generate image.", "error");
         } finally {
             setLoading(false);
         }

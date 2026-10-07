@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useToast } from "./Toast";
 
 export default function VideoStudio() {
+  const { showToast } = useToast();
   const [ratio, setRatio] = useState("16:9");
   const [videoPrompt, setVideoPrompt] = useState("");
   const [videoDuration, setVideoDuration] = useState<number>(5);
@@ -13,6 +15,7 @@ export default function VideoStudio() {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const currentVideoUrlRef = useRef<string | null>(null);
+  const outputSectionRef = useRef<HTMLDivElement | null>(null);
 
   // Clean up object URLs to prevent browser memory leaks
   useEffect(() => {
@@ -24,10 +27,18 @@ export default function VideoStudio() {
   }, []);
 
   const handleGenerateVideo = async () => {
-    if (!videoPrompt.trim()) return alert("Please enter a scene prompt.");
+    if (!videoPrompt.trim()) {
+      showToast("Please enter a scene prompt first.", "warning");
+      return;
+    }
 
     setIsVideoLoading(true);
     setRenderProgress(10);
+
+    // Smooth scroll to output canvas on mobile so user sees progress immediately
+    if (window.innerWidth < 1024 && outputSectionRef.current) {
+      outputSectionRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
 
     try {
       // 1. Fetch reference frame via server route
@@ -174,8 +185,14 @@ export default function VideoStudio() {
       currentVideoUrlRef.current = generatedUrl;
       setVideoUrl(generatedUrl);
       setRenderProgress(100);
+      showToast("Cinematic motion video rendered successfully!", "success");
+
+      // Scroll to video output on mobile
+      if (window.innerWidth < 1024 && outputSectionRef.current) {
+        outputSectionRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
     } catch (err: any) {
-      alert("Error generating video: " + err.message);
+      showToast("Failed to render video: " + err.message, "error");
     } finally {
       setIsVideoLoading(false);
       setRenderProgress(0);
@@ -186,7 +203,7 @@ export default function VideoStudio() {
     <div className="max-w-6xl mx-auto space-y-6">
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-xl p-4 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-5 sm:space-y-6">
+      <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-xl p-3.5 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-5 sm:space-y-6">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1d2537] pb-4 sm:pb-6">
           <div>
@@ -244,10 +261,11 @@ export default function VideoStudio() {
                     key={r.id}
                     type="button"
                     onClick={() => setRatio(r.id)}
-                    className={`py-1.5 px-1 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${ratio === r.id
-                      ? "bg-cyan-600 border-cyan-400 text-white"
-                      : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
-                      }`}
+                    className={`py-1.5 px-1 text-[10px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${
+                      ratio === r.id
+                        ? "bg-cyan-600 border-cyan-400 text-white"
+                        : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
+                    }`}
                     title={r.label}
                   >
                     {r.label}
@@ -271,10 +289,11 @@ export default function VideoStudio() {
                     key={d.sec}
                     type="button"
                     onClick={() => setVideoDuration(d.sec)}
-                    className={`py-1.5 px-1 text-[11px] sm:text-xs font-bold rounded-md border transition text-center cursor-pointer ${videoDuration === d.sec
-                      ? "bg-cyan-600 border-cyan-400 text-white"
-                      : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
-                      }`}
+                    className={`py-1.5 px-1 text-[10px] sm:text-xs font-bold rounded-md border transition text-center cursor-pointer ${
+                      videoDuration === d.sec
+                        ? "bg-cyan-600 border-cyan-400 text-white"
+                        : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
+                    }`}
                   >
                     {d.label}
                   </button>
@@ -293,10 +312,11 @@ export default function VideoStudio() {
                     key={m}
                     type="button"
                     onClick={() => setMotionStyle(m)}
-                    className={`py-1.5 px-1 text-[11px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${motionStyle === m
-                      ? "bg-cyan-600 border-cyan-400 text-white"
-                      : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
-                      }`}
+                    className={`py-1.5 px-1 text-[10px] sm:text-xs font-bold rounded-md border transition text-center truncate cursor-pointer ${
+                      motionStyle === m
+                        ? "bg-cyan-600 border-cyan-400 text-white"
+                        : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#111726] dark:border-[#1e273a] dark:text-slate-400 dark:hover:text-white"
+                    }`}
                     title={m}
                   >
                     {m}
@@ -326,7 +346,7 @@ export default function VideoStudio() {
           </div>
 
           {/* Right Column: Output / Video Monitor */}
-          <div className="lg:col-span-5 flex flex-col">
+          <div ref={outputSectionRef} className="lg:col-span-5 flex flex-col">
             <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
               Canvas Output
             </label>
@@ -355,6 +375,7 @@ export default function VideoStudio() {
                     <a
                       href={videoUrl}
                       download={`nexus-motion-${ratio.replace(":", "-")}.webm`}
+                      onClick={() => showToast("Downloading motion video...", "info")}
                       className="w-full sm:w-auto text-center px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white rounded-lg text-xs font-mono font-bold shadow-md hover:opacity-90 transition cursor-pointer"
                     >
                       Download Video ⤓
