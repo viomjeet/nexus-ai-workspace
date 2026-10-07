@@ -383,43 +383,43 @@ export default function AudioStudio() {
       )}
 
       {/* SCRIPT COMPOSER */}
-      <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-sm p-6 sm:p-8 shadow-sm dark:shadow-2xl space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1a2233] pb-4">
+      <div className="bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1d2537] rounded-xl p-4 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-5 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1a2233] pb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-wide">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-wide">
               Speech Script Composer
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Compose, pace, and shape your voiceover sequence.
             </p>
           </div>
-          <span className="text-xs font-mono text-cyan-700 bg-cyan-50 border border-cyan-200 dark:text-cyan-400 dark:bg-cyan-950/60 dark:border-cyan-800/40 px-3 py-1 rounded-full">
+          <span className="self-start sm:self-auto text-xs font-mono text-cyan-700 bg-cyan-50 border border-cyan-200 dark:text-cyan-400 dark:bg-cyan-950/60 dark:border-cyan-800/40 px-3 py-1 rounded-full">
             {text.length} characters
           </span>
         </div>
 
         <textarea
-          rows={9}
+          rows={7}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write or paste your script here..."
-          className="w-full bg-slate-50 border border-slate-200 rounded-sm p-5 text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 dark:bg-[#090c14] dark:border-[#1b2334] dark:text-slate-100 dark:placeholder-slate-600 transition leading-relaxed resize-none font-mono"
+          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 sm:p-5 text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 dark:bg-[#090c14] dark:border-[#1b2334] dark:text-slate-100 dark:placeholder-slate-600 transition leading-relaxed resize-none font-mono"
         />
 
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1">
+          <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
             <span>Output Format:</span>
-            <span className="font-mono text-slate-750 bg-slate-100 dark:bg-[#161d2d] dark:text-white px-2 py-0.5 rounded border border-slate-200 dark:border-[#232e47]">
+            <span className="font-mono text-slate-700 bg-slate-100 dark:bg-[#161d2d] dark:text-white px-2 py-0.5 rounded border border-slate-200 dark:border-[#232e47]">
               MP3 24kHz @ 48kbps
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-auto">
               <select
                 value={voice}
                 onChange={(e) => setVoice(e.target.value)}
-                className="bg-white border border-slate-200 hover:border-cyan-500/50 text-slate-800 text-xs font-semibold rounded-sm px-4 py-3 pr-8 focus:outline-none focus:border-cyan-400 dark:bg-[#141a27] dark:border-[#252f44] dark:text-slate-200 transition cursor-pointer appearance-none shadow-sm"
+                className="w-full sm:w-auto bg-white border border-slate-200 hover:border-cyan-500/50 text-slate-800 text-xs font-semibold rounded-lg px-3.5 sm:px-4 py-2.5 sm:py-3 pr-8 focus:outline-none focus:border-cyan-400 dark:bg-[#141a27] dark:border-[#252f44] dark:text-slate-200 transition cursor-pointer appearance-none shadow-sm"
               >
                 {voiceCatalog.map((v) => {
                   const isOptionDisabled = isHindiScript && !v.id.startsWith("hi-IN");
@@ -446,7 +446,7 @@ export default function AudioStudio() {
             {!isAudioLoading ? (
               <button
                 onClick={handleGenerateAudio}
-                className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm rounded-sm shadow-lg shadow-cyan-500/20 active:scale-95 transition flex items-center gap-2"
+                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm rounded-lg shadow-lg shadow-cyan-500/20 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>⚡</span>
                 <span>Generate Voiceover</span>
@@ -454,7 +454,7 @@ export default function AudioStudio() {
             ) : (
               <button
                 onClick={handleCancelGeneration}
-                className="px-8 py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm rounded-sm shadow-lg shadow-rose-600/30 animate-pulse transition flex items-center gap-2"
+                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm rounded-lg shadow-lg shadow-rose-600/30 animate-pulse transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>✕</span>
                 <span>Abort Rendering</span>
@@ -469,34 +469,34 @@ export default function AudioStudio() {
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
           {/* AUDIO MONITORING DECK (70%) */}
           <div
-            className={`lg:col-span-7 bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1f283c] rounded-sm p-6 sm:p-7 shadow-sm dark:shadow-2xl space-y-5 transition-all duration-300 ${
+            className={`lg:col-span-7 bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1f283c] rounded-xl p-4 sm:p-6 md:p-7 shadow-sm dark:shadow-2xl space-y-4 sm:space-y-5 transition-all duration-300 ${
               audioUrl && !isAudioLoading
                 ? "opacity-100 ring-1 ring-cyan-500/30"
                 : "opacity-40 pointer-events-none"
             }`}
           >
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1c2538] pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-[#1c2538] pb-3">
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
                   Master Synthesized Console
                 </span>
-                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
                   Audio Monitoring & Mixer Deck
                 </h3>
               </div>
-              <span className="text-xs font-mono text-slate-600 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-[#161d2d] px-3 py-1 rounded-full dark:border-[#232e47]">
+              <span className="self-start sm:self-auto text-xs font-mono text-slate-600 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-[#161d2d] px-3 py-1 rounded-full dark:border-[#232e47]">
                 {audioUrl ? "Render Complete" : "Standby"}
               </span>
             </div>
 
-            <div className="h-24 bg-slate-50 border border-slate-200 dark:bg-[#080b12] dark:border-[#1b2335] rounded-sm flex flex-col items-center justify-center p-3 relative overflow-hidden">
-              <div className="flex items-end gap-1.5 h-14 w-full justify-center">
+            <div className="h-20 sm:h-24 bg-slate-50 border border-slate-200 dark:bg-[#080b12] dark:border-[#1b2335] rounded-xl flex flex-col items-center justify-center p-3 relative overflow-hidden">
+              <div className="flex items-end gap-1 sm:gap-1.5 h-12 sm:h-14 w-full justify-center">
                 {[30, 60, 25, 80, 90, 40, 65, 95, 55, 30, 70, 85, 45, 60, 75, 40, 85, 25].map(
                   (h, idx) => (
                     <div
                       key={idx}
                       style={{ height: isPlaying ? `${h}%` : "12%" }}
-                      className={`w-2 rounded-full transition-all duration-150 ${
+                      className={`w-1.5 sm:w-2 rounded-full transition-all duration-150 ${
                         isPlaying
                           ? "bg-gradient-to-t from-cyan-500 to-indigo-500 shadow-md shadow-cyan-500/30"
                           : "bg-slate-200 dark:bg-[#182030]"
@@ -505,13 +505,13 @@ export default function AudioStudio() {
                   )
                 )}
               </div>
-              <span className="text-[10px] font-mono text-slate-500 mt-1">
+              <span className="text-[10px] font-mono text-slate-500 mt-1 truncate max-w-full px-2">
                 Stereo Output • {bgmFileName ? "Voice + BGM Synced" : "Voice Master"}
               </span>
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-xs font-mono text-slate-500 dark:text-slate-400">
+              <div className="flex justify-between text-[11px] sm:text-xs font-mono text-slate-500 dark:text-slate-400">
                 <span>Voice Progress</span>
                 <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
               </div>
@@ -526,7 +526,7 @@ export default function AudioStudio() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] p-3.5 rounded-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] p-3 sm:p-3.5 rounded-xl">
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs font-semibold">
                   <span className="text-slate-700 dark:text-slate-300">🎙 Voiceover Gain</span>
@@ -565,32 +565,32 @@ export default function AudioStudio() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+              <div className="flex items-center justify-between sm:justify-start gap-3">
                 <button
                   onClick={toggleMasterPlay}
-                  className="h-12 w-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xl flex items-center justify-center shadow-lg shadow-cyan-500/25 active:scale-95 transition"
+                  className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-lg sm:text-xl flex items-center justify-center shadow-lg shadow-cyan-500/25 active:scale-95 transition cursor-pointer shrink-0"
                 >
                   {isPlaying ? "❚❚" : "▶"}
                 </button>
                 <button
                   onClick={stopMasterAudio}
-                  className="h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 flex items-center justify-center text-xs transition"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 flex items-center justify-center text-xs transition cursor-pointer shrink-0"
                   title="Stop & Reset"
                 >
                   ◼
                 </button>
               </div>
 
-              <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 dark:bg-[#090c14] p-1 rounded-sm dark:border-[#1c2438]">
-                <span className="text-[11px] font-bold text-slate-500 px-2 uppercase">
-                  Speech Speed
+              <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 dark:bg-[#090c14] p-1 rounded-lg dark:border-[#1c2438] overflow-x-auto max-w-full">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 px-2 uppercase shrink-0">
+                  Speed
                 </span>
                 {[0.75, 1, 1.25, 1.5, 2].map((speed) => (
                   <button
                     key={speed}
                     onClick={() => handleSpeedChange(speed)}
-                    className={`px-2.5 py-1 text-xs font-bold rounded-sm transition ${
+                    className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md transition cursor-pointer shrink-0 ${
                       playbackSpeed === speed
                         ? "bg-cyan-500 text-black shadow"
                         : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -604,7 +604,7 @@ export default function AudioStudio() {
               <button
                 onClick={handleExportTrack}
                 disabled={isExporting}
-                className="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs rounded-sm shadow-lg transition flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 <span>⬇</span>
                 <span>{isExporting ? "Mixing & Exporting..." : "Export Track"}</span>
@@ -613,7 +613,7 @@ export default function AudioStudio() {
           </div>
 
           {/* BACKGROUND SOUNDTRACK DECK (30%) */}
-          <div className="lg:col-span-3 bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1f283c] rounded-sm p-6 shadow-sm dark:shadow-2xl flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-3 bg-white dark:bg-[#0f1420] border border-slate-200 dark:border-[#1f283c] rounded-xl p-4 sm:p-6 shadow-sm dark:shadow-2xl flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1c2538] pb-3">
                 <div>
@@ -628,14 +628,14 @@ export default function AudioStudio() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => bgmInputRef.current?.click()}
-                      className="text-[10px] text-cyan-600 hover:text-cyan-500 dark:text-cyan-400 dark:hover:text-cyan-300 font-mono transition"
+                      className="text-[10px] text-cyan-600 hover:text-cyan-500 dark:text-cyan-400 dark:hover:text-cyan-300 font-mono transition cursor-pointer"
                     >
                       Re-upload
                     </button>
                     <span className="text-slate-400 dark:text-slate-600">•</span>
                     <button
                       onClick={handleRemoveBgm}
-                      className="text-[10px] text-rose-500 hover:text-rose-400 dark:text-rose-400 dark:hover:text-rose-300 font-mono transition"
+                      className="text-[10px] text-rose-500 hover:text-rose-400 dark:text-rose-400 dark:hover:text-rose-300 font-mono transition cursor-pointer"
                     >
                       Remove ✕
                     </button>
@@ -663,7 +663,7 @@ export default function AudioStudio() {
                 onDragLeave={() => setIsDraggingBgm(false)}
                 onDrop={handleBgmDrop}
                 onClick={() => bgmInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-sm p-4 text-center cursor-pointer transition-all ${
+                className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
                   isDraggingBgm
                     ? "border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-950/20"
                     : bgmFileName
@@ -696,7 +696,7 @@ export default function AudioStudio() {
             </div>
 
             {bgmUrl ? (
-              <div className="space-y-3 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] p-3.5 rounded-sm mt-auto">
+              <div className="space-y-3 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] p-3.5 rounded-xl mt-auto">
                 <div className="flex justify-between items-center text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                   <span className="flex items-center gap-1.5">
                     <span
@@ -704,7 +704,7 @@ export default function AudioStudio() {
                         isBgmSoloPlaying ? "bg-indigo-500 dark:bg-indigo-400 animate-pulse" : "bg-slate-400 dark:bg-slate-500"
                       }`}
                     ></span>
-                    BGM Standalone Player
+                    BGM Player
                   </span>
                   <span className="font-mono text-indigo-600 dark:text-indigo-400">
                     {formatTime(bgmCurrentTime)} / {formatTime(bgmDuration)}
@@ -721,19 +721,19 @@ export default function AudioStudio() {
                   className="w-full accent-indigo-500 dark:accent-indigo-400 cursor-pointer h-1.5 bg-slate-200 dark:bg-[#1e2638] rounded-sm appearance-none"
                 />
 
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={toggleBgmSoloPlay}
-                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-sm text-xs font-bold transition flex items-center gap-1.5 shadow"
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow cursor-pointer"
                     >
                       <span>{isBgmSoloPlaying ? "❚❚" : "▶"}</span>
-                      <span>{isBgmSoloPlaying ? "Pause BGM" : "Play BGM"}</span>
+                      <span>{isBgmSoloPlaying ? "Pause" : "Play"}</span>
                     </button>
 
                     <button
                       onClick={stopBgmSolo}
-                      className="p-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 rounded-sm text-xs transition"
+                      className="p-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 dark:bg-[#151b28] dark:hover:bg-[#20293d] dark:border-[#27334d] dark:text-slate-300 rounded-lg text-xs transition cursor-pointer"
                       title="Stop & Reset Track"
                     >
                       ◼
@@ -746,7 +746,7 @@ export default function AudioStudio() {
                 </div>
               </div>
             ) : (
-              <div className="p-3 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] rounded-sm text-center text-[11px] text-slate-400 dark:text-slate-500">
+              <div className="p-3 bg-slate-50 border border-slate-200 dark:bg-[#090c14] dark:border-[#1a2233] rounded-xl text-center text-[11px] text-slate-400 dark:text-slate-500">
                 Upload a soundtrack to unlock independent audition & cue scrubbing.
               </div>
             )}
